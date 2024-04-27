@@ -1,7 +1,7 @@
 import React from "react";
 import { Button, Container, Paper, Typography } from "@mui/material";
 import { useState } from "react";
-import { loginUser } from "../Authentication/AuthenticationApi";
+import { loginUser, registerUser } from "../Authentication/AuthenticationApi";
 import { useDispatch } from 'react-redux'
 import { userExists } from "../redux/reducer/auth";
 import { toast } from 'react-hot-toast'
@@ -11,8 +11,11 @@ export default function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate()
   const [login, setLogin] = useState(true);
-  const [password, setpassword] = useState()
-  const [username, setusername] = useState()
+  const [password, setpassword] = useState();
+  const [email, setEmail] = useState();
+  const [username, setusername] = useState();
+  const [name, setname] = useState();
+  const [bio , setbio] = useState();
   const handleLogin = async () => {
     try {
       const data = await loginUser({ username, password })
@@ -30,6 +33,18 @@ export default function Login() {
 
   }
   const handleRegister = async () => {
+    try {
+      const data = await registerUser({ username, password, email, bio, name })
+      if (data.success) {
+        localStorage.setItem('token', data.token)
+        dispatch(userExists(data.user))
+        toast.success(data.message)
+        navigate('/')
+      }
+
+    } catch (e) {
+      toast.error(e.response?.data?.message);
+    }
   }
   return (
     <Container maxWidth="xs" maxHeight="lg">
@@ -84,11 +99,22 @@ export default function Login() {
 
           ) : (
             <div className="row mt-5 " style={{ maxHeight: "400px" }}>
+                <div className="col">
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="username"
+                  onChange={(e) => setname(e.target.value)}
+                  aria-label="Name"
+                />
+              </div>
+
               <div className="col-12 mt-2">
                 <input
                   type="text"
                   className="form-control"
                   placeholder="User Name"
+                  onChange={(e) => { setusername(e.target.value)}}
                   aria-label="First name"
                 />
               </div>
@@ -97,6 +123,7 @@ export default function Login() {
                   type="text"
                   className="form-control"
                   placeholder="Bio"
+                  onChange={(e) => { setbio(e.target.value)}}
                   aria-label="First name"
                 />
               </div>
@@ -106,6 +133,8 @@ export default function Login() {
                   type="email"
                   className="form-control"
                   placeholder="Email"
+                  onChange={(e) => setEmail(e.target.value)}
+
                   aria-label="First name"
                 />
               </div>
@@ -114,6 +143,8 @@ export default function Login() {
                   type="password"
                   className="form-control"
                   placeholder="Password"
+                  onChange={(e) => setpassword(e.target.value)}
+
                   aria-label="Last name"
                 />
               </div>
@@ -134,11 +165,6 @@ export default function Login() {
 
           )
         }
-
-
-
-
-
       </Paper>
     </Container>
   );
